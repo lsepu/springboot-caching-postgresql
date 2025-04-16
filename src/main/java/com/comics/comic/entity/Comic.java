@@ -1,14 +1,11 @@
 package com.comics.comic.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -16,10 +13,13 @@ import java.time.LocalDateTime;
 public class Comic {
 
     @Id
-    @GeneratedValue
-    private Long Id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
+    @Column(name = "name", nullable = false, length = 50, unique = true)
     private String name;
+
+    @Column(name = "date_published")
     private LocalDate datePublished;
 
 }

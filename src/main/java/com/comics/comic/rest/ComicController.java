@@ -1,10 +1,8 @@
 package com.comics.comic.rest;
 
-
-import com.comics.comic.entity.Comic;
+import com.comics.comic.rest.dto.ComicRequest;
 import com.comics.comic.rest.dto.ComicResponse;
 import com.comics.comic.service.ComicService;
-import com.comics.comic.util.mapper.ComicMapper;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -13,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
+import java.util.UUID;
+
 import static com.comics.comic.constants.GeneralConstants.*;
 
 @RestController
@@ -20,38 +20,40 @@ import static com.comics.comic.constants.GeneralConstants.*;
 @RequestMapping(COMIC_PATH)
 public class ComicController {
     private final ComicService comicService;
-    private final ComicMapper comicMapper;
 
     @PostMapping
     public ResponseEntity<ComicResponse> addComic(
-            @RequestBody Comic comic,
+            @RequestBody ComicRequest comic,
             UriComponentsBuilder uriBuilder) {
-        Comic comicAdded = comicService.addComic(comic);
+        ComicResponse comicAdded = comicService.addComic(comic);
 
         URI location = uriBuilder.path(COMIC_NAME_IN_PATH)
-                .buildAndExpand(comicAdded.getName())
+                .buildAndExpand(comicAdded.name())
                 .toUri();
 
-        return ResponseEntity.created(location).body(comicMapper.toComicResponse(comicAdded));
+        return ResponseEntity.created(location).body(comicAdded);
     }
 
     @GetMapping
     public ResponseEntity<ComicResponse> getComic(@RequestParam(name = "name") String comicName){
-        Comic comic = comicService.getComic(comicName);
-        return ResponseEntity.ok(comicMapper.toComicResponse(comic));
+        ComicResponse comic = comicService.getComic(comicName);
+        return ResponseEntity.ok(comic);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<Page<ComicResponse>> getAllComics(@ParameterObject Pageable pageable){
+        Page<ComicResponse> comics = comicService.getAllComics(pageable);
 
-        Page<ComicResponse> comics = comicService.getAllComics(pageable)
-                .map(comicMapper::toComicResponse);
-
-        if(comics.isEmpty()){
+        if(comics.isEmpty())
             return ResponseEntity.noContent().build();
-        }
 
         return ResponseEntity.ok(comics);
+    }
+
+    @GetMapping(ID_IN_PATH)
+    public ResponseEntity<ComicResponse> getComic(@PathVariable UUID id){
+        ComicResponse comic = comicService.getComic(id);
+        return ResponseEntity.ok(comic);
     }
 
     @DeleteMapping

@@ -1,16 +1,17 @@
 package com.comics.comic.service;
 
-import com.comics.comic.entity.Comic;
+import com.comics.comic.rest.dto.ComicRequest;
+import com.comics.comic.rest.dto.ComicResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface IComicService {
 
-    Comic getComic(String comic);
+    ComicResponse getComic(String comic);
 
-    Page<Comic> getAllComics(Pageable pageable);
+    Page<ComicResponse> getAllComics(Pageable pageable);
 
-    Comic addComic(Comic comic);
+    ComicResponse addComic(ComicRequest comic);
 
     String deleteComic(String comicName);
 
