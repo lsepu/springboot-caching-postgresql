@@ -14,14 +14,10 @@ public class CacheInspectionService {
 
     private final CacheManager cacheManager;
 
-    public void printCacheContent(String cacheName){
+    public String printCacheContent(String cacheName){
         Cache cache = cacheManager.getCache(cacheName);
-        if(cache!=null){
-            System.out.println("Cache contents");
-            System.out.println(Objects.requireNonNull(cache.getNativeCache()));
-        }else{
-            System.out.println("No cache: " + cacheName);
-        }
+        System.out.println("Cache contents");
+        return Objects.requireNonNull(cache.getNativeCache()).toString();
     }
 
 }

@@ -82,8 +82,8 @@ public class ComicController {
      * Added just to check cache values
      */
     @GetMapping(CACHE_PATH)
-    public void getCache(){
-        cacheInspectionService.printCacheContent(COMIC_CACHE_NAME);
+    public String getCache(@RequestParam(name = "name") String cacheName){
+        return cacheInspectionService.printCacheContent(cacheName);
     }
 
 
