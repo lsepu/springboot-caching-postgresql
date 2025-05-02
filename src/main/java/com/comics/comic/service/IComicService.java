@@ -5,6 +5,8 @@ import com.comics.comic.rest.dto.ComicResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.UUID;
+
 public interface IComicService {
 
     ComicResponse getComic(String comic);
@@ -14,5 +16,7 @@ public interface IComicService {
     ComicResponse addComic(ComicRequest comic);
 
     String deleteComic(String comicName);
+
+    ComicResponse updateComic(ComicRequest comicRequest);
 
 }

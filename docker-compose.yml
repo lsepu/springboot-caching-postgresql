@@ -5,7 +5,7 @@ services:
     image: postgres:15
     container_name: postgres_springboot
     environment:
-      POSTGRES_DB: comics
+      POSTGRES_DB: comicDB
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:

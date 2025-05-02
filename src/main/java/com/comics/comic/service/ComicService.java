@@ -1,6 +1,7 @@
 package com.comics.comic.service;
 
 import com.comics.comic.entity.Comic;
+import com.comics.comic.exception.ComicAlreadyExistsException;
 import com.comics.comic.exception.ComicNotFoundException;
 import com.comics.comic.repository.ComicRepository;
 import com.comics.comic.rest.dto.ComicRequest;
@@ -46,12 +47,34 @@ public class ComicService implements IComicService {
     }
 
     @Override
+    @Transactional
     public ComicResponse addComic(ComicRequest comicRequest){
+
+        comicRepository.findByName(comicRequest.name())
+                .ifPresent(comic -> {
+                    throw new ComicAlreadyExistsException(comicRequest.name());
+                });
+
         log.info("Inserting comic " + comicRequest.name());
         Comic comic = comicMapper.toComic(comicRequest);
         Comic comicSaved = comicRepository.save(comic);
         return comicMapper.toComicResponse(comicSaved);
     }
+
+    @Override
+    @Transactional
+    public ComicResponse updateComic(ComicRequest comicRequest){
+        Comic comic = comicRepository.findByName(comicRequest.name())
+                .orElseThrow(() -> new ComicNotFoundException(comicRequest.name()));
+
+        comic.setDatePublished(comicRequest.datePublished());
+        comic.setName(comicRequest.name());
+
+        Comic comicSaved = comicRepository.save(comic);
+        return comicMapper.toComicResponse(comicSaved);
+    }
+
+
 
     @Override
     @Transactional
@@ -62,7 +85,7 @@ public class ComicService implements IComicService {
                 .orElseThrow(() -> new ComicNotFoundException(comicName));
 
         comicRepository.deleteByName(comic.getName());
-        return String.format("Comic %s was deleted", comic.getName());
+        return comic.getId().toString();
     }
 
 

@@ -2,16 +2,20 @@ package com.comics.comic.rest;
 
 import com.comics.comic.rest.dto.ComicRequest;
 import com.comics.comic.rest.dto.ComicResponse;
+import com.comics.comic.service.CacheInspectionService;
 import com.comics.comic.service.ComicService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
-import java.util.UUID;
 
 import static com.comics.comic.constants.GeneralConstants.*;
 
@@ -20,8 +24,10 @@ import static com.comics.comic.constants.GeneralConstants.*;
 @RequestMapping(COMIC_PATH)
 public class ComicController {
     private final ComicService comicService;
+    private final CacheInspectionService cacheInspectionService;
 
     @PostMapping
+    @CacheEvict(value = ALL_COMICS_CACHE_NAME, allEntries = true)
     public ResponseEntity<ComicResponse> addComic(
             @RequestBody ComicRequest comic,
             UriComponentsBuilder uriBuilder) {
@@ -35,12 +41,14 @@ public class ComicController {
     }
 
     @GetMapping
+    @Cacheable(value = COMIC_CACHE_NAME, key = COMIC_NAME_CACHE_KEY)
     public ResponseEntity<ComicResponse> getComic(@RequestParam(name = "name") String comicName){
         ComicResponse comic = comicService.getComic(comicName);
         return ResponseEntity.ok(comic);
     }
 
-    @GetMapping("/all")
+    @GetMapping(ALL_COMICS_PATH)
+    @Cacheable(ALL_COMICS_CACHE_NAME)
     public ResponseEntity<Page<ComicResponse>> getAllComics(@ParameterObject Pageable pageable){
         Page<ComicResponse> comics = comicService.getAllComics(pageable);
 
@@ -50,18 +58,33 @@ public class ComicController {
         return ResponseEntity.ok(comics);
     }
 
-    @GetMapping(ID_IN_PATH)
-    public ResponseEntity<ComicResponse> getComic(@PathVariable UUID id){
-        ComicResponse comic = comicService.getComic(id);
+    @DeleteMapping
+    @Caching(evict = {
+            @CacheEvict(value = COMIC_CACHE_NAME, key = COMIC_NAME_CACHE_KEY),
+            @CacheEvict(value = ALL_COMICS_CACHE_NAME, allEntries = true)
+    })
+    public ResponseEntity<String> deleteComic(@RequestParam String comicName){
+        String idOfComicEliminated = comicService.deleteComic(comicName);
+        return ResponseEntity.ok(String.format("Comic %s with id %s was deleted", comicName, idOfComicEliminated));
+    }
+
+    @PutMapping
+    @CachePut(value = COMIC_CACHE_NAME, key = COMIC_NAME_CACHE_KEY_IN_UPDATE)
+    @CacheEvict(value = ALL_COMICS_CACHE_NAME, allEntries = true)
+    public ResponseEntity<ComicResponse> updateComic(
+                                                  @RequestBody ComicRequest comicRequest,
+                                                  UriComponentsBuilder uriBuilder){
+        ComicResponse comic = comicService.updateComic(comicRequest);
         return ResponseEntity.ok(comic);
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteComic(@RequestParam String comicName){
-        String comicResponse = comicService.deleteComic(comicName);
-        return ResponseEntity.ok(comicResponse);
+    /**
+     * Added just to check cache values
+     */
+    @GetMapping(CACHE_PATH)
+    public void getCache(){
+        cacheInspectionService.printCacheContent(COMIC_CACHE_NAME);
     }
-
 
 
 }
