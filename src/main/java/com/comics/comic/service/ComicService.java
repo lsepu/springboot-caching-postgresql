@@ -9,12 +9,18 @@ import com.comics.comic.rest.dto.ComicResponse;
 import com.comics.comic.util.mapper.ComicMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.comics.comic.constants.GeneralConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,7 @@ public class ComicService implements IComicService {
     private final ComicMapper comicMapper;
 
     @Override
+    @Cacheable(value = COMIC_CACHE_NAME, key = COMIC_NAME_CACHE_KEY)
     public ComicResponse getComic(String comicName){
         log.info("Getting comic " + comicName);
         Comic comic = comicRepository.findByName(comicName)
@@ -40,6 +47,7 @@ public class ComicService implements IComicService {
 
 
     @Override
+    @Cacheable(ALL_COMICS_CACHE_NAME)
     public Page<ComicResponse> getAllComics(Pageable pageable){
         log.info("Finding all comics");
         return comicRepository.findAll(pageable)
@@ -48,6 +56,7 @@ public class ComicService implements IComicService {
 
     @Override
     @Transactional
+    @CacheEvict(value = ALL_COMICS_CACHE_NAME, allEntries = true)
     public ComicResponse addComic(ComicRequest comicRequest){
 
         comicRepository.findByName(comicRequest.name())
@@ -63,6 +72,8 @@ public class ComicService implements IComicService {
 
     @Override
     @Transactional
+    @CachePut(value = COMIC_CACHE_NAME, key = COMIC_NAME_CACHE_KEY_IN_UPDATE)
+    @CacheEvict(value = ALL_COMICS_CACHE_NAME, allEntries = true)
     public ComicResponse updateComic(ComicRequest comicRequest){
         Comic comic = comicRepository.findByName(comicRequest.name())
                 .orElseThrow(() -> new ComicNotFoundException(comicRequest.name()));
@@ -77,6 +88,10 @@ public class ComicService implements IComicService {
 
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = COMIC_CACHE_NAME, key = COMIC_NAME_CACHE_KEY),
+            @CacheEvict(value = ALL_COMICS_CACHE_NAME, allEntries = true)
+    })
     @Transactional
     public String deleteComic(String comicName){
         log.info("Deleting comic " + comicName);
