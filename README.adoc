@@ -4,7 +4,7 @@ The goal of this project is to explore how caching works. For it, we are going t
 
 == Project Diagram
 
-image::documentation/project_diagram.png[]
+image::documentation/diagram.png[]
 
 == Applications
 comics-api
