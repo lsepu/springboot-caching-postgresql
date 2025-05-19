@@ -10,7 +10,7 @@ image::documentation/diagram.png[]
 comics-api
 `Spring Boot` Web Java application that has endpoints to manage comics. Data is stored in `PostgreSQL` and caching handled by `Simple` or `Redis`.
 +
-image::documentation/comic-api-swagger.jpeg[]
+image:documentation/comic-api-swagger.png[]
 
 == Caching
 
@@ -70,3 +70,12 @@ docker compose up -d
 ----
 ./mvnw clean spring-boot:run  -Dspring-boot.run.profiles=redis
 ----
+
+== Application URL
+
+|===
+|Application |URL
+
+|comic-api
+|http://localhost:8080/swagger-ui.html
+|===
