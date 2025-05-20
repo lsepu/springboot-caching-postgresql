@@ -79,3 +79,64 @@ docker compose up -d
 |comic-api
 |http://localhost:8080/swagger-ui.html
 |===
+
+== Simulation
+
+Open a terminal and run the following commands:
+
+* Create a comic
++
+[source]
+----
+curl --request POST \
+  --url http://localhost:8080/api/comic \
+  --header 'content-type: application/json' \
+  --data '{
+  "name": "batman",
+  "datePublished": "2020-10-10"
+}'
+----
+
+* Update a comic
++
+[source]
+----
+curl --request PUT \
+  --url http://localhost:8080/api/comic \
+  --header 'content-type: application/json' \
+  --data '{
+  "name": "batman",
+  "datePublished": "2020-12-21"
+}'
+----
+* Get a comic
++
+[source]
+----
+curl --request GET \
+  --url 'http://localhost:8080/api/comic?name=batman' \
+  --header 'content-type: application/json'
+----
+* Get all comics
++
+[source]
+----
+curl --request GET \
+  --url http://localhost:8080/api/comic/all \
+  --header 'content-type: application/json'
+----
+* Check Simple Cache
++
+[source]
+----
+curl --request GET \
+  --url 'http://localhost:8080/api/comic/cache?name=Comic' \
+  --header 'content-type: application/json'
+----
+
+== Useful Links
+* **redis-commander**
++
+`redis-commander` UI can be accessed at http://localhost:8081.
++
+image::documentation/redis-comander.png[]
